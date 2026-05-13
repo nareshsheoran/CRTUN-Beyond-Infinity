@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CRTUN | Beyond Infinity</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,900;1,400&family=Montserrat:wght@200;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --saffron: #FF9933;
+            --pink: #FF4D6D;
+            --gold: #FFD700;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.12);
+        }
+
+        * { cursor: none; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            font-family: 'Montserrat', sans-serif;
+            background: #000; color: white;
+            overflow-x: hidden;
+            scroll-behavior: auto !important;
+        }
+
+        /* 1. CINEMATIC BACKGROUND */
+        #bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            z-index: -2; filter: brightness(0.3);
+            transition: background-image 1.2s ease-in-out;
+        }
+
+        .marquee-bg {
+            position: fixed; top: 50%; transform: translateY(-50%);
+            width: 100%; white-space: nowrap; overflow: hidden;
+            z-index: -1; pointer-events: none; opacity: 0;
+            transition: opacity 2s ease;
+        }
+
+        .marquee-content {
+            display: inline-block; font-family: 'Playfair Display', serif;
+            font-size: 18vw; font-weight: 900; color: rgba(255, 153, 51, 0.05); 
+            animation: scrollText 30s linear infinite; text-transform: uppercase;
+        }
+
+        @keyframes scrollText { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        #cursor {
+            position: fixed; width: 12px; height: 12px; background: var(--saffron);
+            border-radius: 50%; pointer-events: none; z-index: 10000;
+            transition: transform 0.1s; box-shadow: 0 0 15px var(--saffron);
+        }
+
+        /* 2. LAYOUTS */
+        .full-page {
+            position: relative; width: 100%; height: 100vh;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 0 10%; z-index: 10; text-align: center;
+        }
+
+        .hidden { display: none !important; }
+
+        h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem, 8vw, 6.5rem); margin: 0; background: linear-gradient(to bottom, #fff, var(--saffron)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .sub-text { font-size: 0.8rem; letter-spacing: 8px; text-transform: uppercase; margin-bottom: 20px; opacity: 0.6; font-weight: 300; }
+
+        .pro-btn {
+            background: transparent; color: white; border: 1px solid rgba(255,255,255,0.4);
+            padding: 18px 50px; border-radius: 0; font-size: 0.8rem; letter-spacing: 4px;
+            text-transform: uppercase; cursor: pointer; transition: 0.3s;
+        }
+
+        .pro-btn:hover { background: #fff; color: #000; letter-spacing: 6px; }
+
+        .glow-btn {
+            margin-top: 50px;
+            animation: pulseGlow 2s infinite ease-in-out;
+            border-color: var(--pink);
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 77, 109, 0.2); }
+            50% { box-shadow: 0 0 25px rgba(255, 77, 109, 0.6); }
+        }
+
+        input { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); padding: 15px; color: white; font-size: 1.2rem; width: 300px; text-align: center; outline: none; margin-top: 30px; }
+
+        /* 3. GLIMPSE CARDS */
+        #scrollContainer { width: 100%; background: black; position: relative; z-index: 5; }
+        .memory-row { min-height: 85vh; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transform: translateY(30px); transition: all 1s ease-out; padding: 5vh 10%; }
+        .memory-row.visible { opacity: 1; transform: translateY(0); }
+        .glass-card { background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(20px); padding: 50px 40px; max-width: 800px; width: 100%; box-shadow: 0 30px 80px rgba(0,0,0,0.7); }
+        .memory-title { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 5vw, 3.2rem); color: var(--saffron); margin-bottom: 20px; }
+
+        /* 4. FINAL PAGE */
+        #pageFinal { width: 100%; background: #000; position: relative; z-index: 100; min-height: 100vh; overflow-y: auto; display: block; }
+        .final-content-wrapper { display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 10vh 10% 50px 10%; }
+
+        .wishes-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px;
+            width: 100%; max-width: 1000px; margin: 50px auto;
+        }
+
+        .wish-item {
+            background: var(--glass); border: 1px solid var(--border);
+            padding: 35px; text-align: left; backdrop-filter: blur(15px);
+            opacity: 0; transform: translateY(30px); transition: 0.8s;
+        }
+
+        .wish-item.animate-in { opacity: 1; transform: translateY(0); }
+        .wish-item h3 { color: var(--saffron); font-size: 1rem; margin-bottom: 12px; letter-spacing: 3px; font-weight: 600; }
+        
+        .queen-header {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.2rem, 7vw, 5.5rem); font-weight: 900;
+            text-align: center; background: linear-gradient(45deg, #fff, var(--saffron), var(--gold), #fff);
+            background-size: 200% auto; -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; animation: shineText 5s linear infinite;
+        }
+
+        @keyframes shineText { to { background-position: 200% center; } }
+
+        .footer-handles {
+            margin-top: auto; padding-top: 100px; 
+            font-size: 0.75rem; letter-spacing: 5px;
+            opacity: 0.4; display: flex; gap: 30px; text-transform: uppercase; 
+            justify-content: center; font-weight: 400;
+        }
+
+        .signature-title { 
+            margin-top: 20px; padding-bottom: 40px;
+            font-family: 'Playfair Display', serif; 
+            font-size: clamp(2.5rem, 8vw, 6rem); 
+            opacity: 0.95; text-align: center;
+        }
+
+        @media (max-width: 850px) {
+            #cursor { display: none; }
+            .wishes-grid { grid-template-columns: 1fr; padding: 0 20px; }
+            .footer-handles { flex-direction: column; gap: 10px; align-items: center; letter-spacing: 3px; padding-top: 60px;}
+            .signature-title { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="mySong" loop>
+        <source src="YOUR_SONG_URL_HERE.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="cursor"></div>
+    <div id="bg" style="background-image: url('image_0.png');"></div>
+    
+    <div id="marquee" class="marquee-bg">
+        <div class="marquee-content">CRTUN &nbsp;&nbsp; CRTUN &nbsp;&nbsp; CRTUN &nbsp;&nbsp; CRTUN &nbsp;&nbsp;</div>
+        <div class="marquee-content">CRTUN &nbsp;&nbsp; CRTUN &nbsp;&nbsp; CRTUN &nbsp;&nbsp; CRTUN &nbsp;&nbsp;</div>
+    </div>
+
+    <div id="main-content">
+        <div id="page1" class="full-page">
+            <h1>A Soul Like No Other</h1>
+            <input type="text" id="nameInput" placeholder="Enter Nickname">
+            <div style="height: 150px; display: flex; align-items: center; justify-content: center; width: 100%;">
+                <button id="submitBtn" class="pro-btn">Explore Infinity</button>
+            </div>
+        </div>
+
+        <div id="page2" class="full-page hidden">
+            <div class="sub-text">31 May 2026</div>
+            <h1>Happy Birthday, <br>CRTUN</h1>
+            <p style="font-size: 1.1rem; font-weight: 200; max-width: 600px; margin-top: 25px;">To the most caring and beautiful soul. My safe place and my biggest blessing.</p>
+            <button onclick="startJourney()" class="pro-btn">Captured In Time</button>
+        </div>
+
+        <div id="scrollContainer" class="hidden">
+            <div class="memory-row" data-bg="image_1.png">
+                <div class="glass-card">
+                    <div class="sub-text">The First Glimpse</div>
+                    <div class="memory-title">First Seen Glimpses</div>
+                    <p class="memory-desc">I have never forgotten the very first day I saw you at your sister’s wedding 💃✨. That moment is forever engraved in my heart. ❤️📸</p>
+                </div>
+            </div>
+            <div class="memory-row" data-bg="image_2.png">
+                <div class="glass-card">
+                    <div class="sub-text">A Magical Evening</div>
+                    <div class="memory-title">First Coffee Meeting</div>
+                    <p class="memory-desc">The sparkle in your eyes ✨👀 under the evening sky 🌅 and the way time seemed to stop just for us. ⏳💞</p>
+                </div>
+            </div>
+
+            <div class="memory-row" data-bg="image_3.png">
+                <div class="glass-card">
+                    <div class="sub-text">A Simple Gesture</div>
+                    <div class="memory-title">The Rose</div>
+                    <p class="memory-desc">I brought a single red rose especially for you 🌹. Seeing your shy smile after knowing about that rose is a memory I cherish deeply.</p>
+                </div>
+            </div>
+
+            <div class="memory-row" data-bg="image_4.png">
+                <div class="glass-card">
+                    <div class="sub-text">Our Rhythm</div>
+                    <div class="memory-title">The Calls</div>
+                    <p class="memory-desc">My day starts with you. Your "Good Morning" calls and those happy moments we share are the highlights of my life. 📞📚</p>
+                </div>
+            </div>
+
+            <div class="memory-row" data-bg="image_5.png">
+                <div class="glass-card">
+                    <div class="sub-text">One Year Ago</div>
+                    <div class="memory-title">Birthday Meeting</div>
+                    <p class="memory-desc">Remembering our last meeting for coffee on your previous birthday. Every second spent with you was absolutely precious. ☕✨</p>
+                </div>
+            </div>
+
+            <div class="memory-row" data-bg="image_6.png">
+                <div class="glass-card">
+                    <div class="sub-text">Secret Language</div>
+                    <div class="memory-title" style="font-size: 8rem; color: var(--pink);">"UHU"</div>
+                    <p class="memory-desc">It’s not just a word; it’s a special feeling that connects us across the distance. 🤗💕</p>
+                </div>
+            </div>
+
+            <div class="memory-row" data-bg="image_5.png">
+                <div class="glass-card" style="border-color: var(--pink);">
+                    <div class="sub-text">From My Heart</div>
+                    <div class="memory-title">Missing CRTUN</div>
+                    <p class="memory-desc">I am missing you so much on your special birthday 💔🎉. I wish I could be there to celebrate with you.</p>
+                </div>
+                <button onclick="goToFinal()" class="pro-btn glow-btn">Read My Final Wishes</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pageFinal" class="hidden">
+        <div class="final-content-wrapper">
+            <div class="queen-header">Happy Birthday, <br>My Queen CRTUN</div>
+            <div class="wishes-grid">
+                <div class="wish-item"><h3>BRIGHT FUTURE</h3><p>May your path be filled with light. Every study and dream—I am always rooting for you.</p></div>
+                <div class="wish-item"><h3>INTERNAL PEACE</h3><p>I wish for you a heart that is always at peace, knowing you are deeply appreciated.</p></div>
+                <div class="wish-item"><h3>ENDLESS JOY</h3><p>May this year bring you countless reasons to smile and make your eyes sparkle.</p></div>
+                <div class="wish-item"><h3>OUR BOND</h3><p>I wish for more coffee, roses, and thousands of "UHU" moments. You are my favorite person.</p></div>
+            </div>
+            <p style="margin-top: 40px; font-weight: 200; font-style: italic; opacity: 0.8; text-align: center;">I love you more with every breath, today and forever.</p>
+            <div class="footer-handles">
+                <span>sheoran_naresh_014</span>
+                <span>bedwal001</span>
+            </div>
+            <h1 class="signature-title">Always Yours</h1>
+        </div>
+    </div>
+
+    <script>
+        const cursor = document.getElementById('cursor');
+        const btn = document.getElementById('submitBtn');
+        const input = document.getElementById('nameInput');
+        const bg = document.getElementById('bg');
+        const marquee = document.getElementById('marquee');
+        const song = document.getElementById('mySong'); // Audio Reference
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+            const moveX = (e.clientX - window.innerWidth / 2) / 30;
+            marquee.style.transform = `translateY(-50%) translateX(${moveX}px)`;
+        });
+
+        const moveButton = () => {
+            if (input.value.toLowerCase().trim() !== 'crtun') {
+                const x = Math.random() * (window.innerWidth - btn.offsetWidth - 100) + 50;
+                const y = Math.random() * (window.innerHeight - btn.offsetHeight - 100) + 50;
+                btn.style.position = 'fixed';
+                btn.style.left = x + 'px';
+                btn.style.top = y + 'px';
+            }
+        };
+
+        btn.addEventListener('mouseover', moveButton);
+        btn.addEventListener('click', () => {
+            if (input.value.toLowerCase().trim() === 'crtun') {
+                // SONG STARTS HERE
+                song.play().catch(e => console.log("Audio failed to play automatically"));
+                
+                btn.style.position = 'static';
+                document.getElementById('page1').classList.add('hidden');
+                document.getElementById('page2').classList.remove('hidden');
+                marquee.style.opacity = '1';
+            } else { moveButton(); }
+        });
+
+        function startJourney() {
+            document.getElementById('page2').classList.add('hidden');
+            document.getElementById('scrollContainer').classList.remove('hidden');
+            document.body.style.overflowY = 'auto';
+            bg.style.backgroundImage = "url('image_1.png')";
+            window.scrollTo(0, 0);
+        }
+
+        function goToFinal() {
+            document.body.style.overflow = 'hidden'; 
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.getElementById('main-content').style.display = 'none';
+            document.getElementById('pageFinal').classList.remove('hidden');
+            bg.style.backgroundImage = "url('image_0.png')";
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+                document.body.style.overflowY = 'auto';
+                document.querySelectorAll('.wish-item').forEach((item, i) => {
+                    setTimeout(() => item.classList.add('animate-in'), 300 * i);
+                });
+            }, 80);
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    if (entry.target.dataset.bg) bg.style.backgroundImage = `url('${entry.target.dataset.bg}')`;
+                }
+            });
+        }, { threshold: 0.25 });
+
+        document.querySelectorAll('.memory-row').forEach(row => observer.observe(row));
+    </script>
+</body>
+</html>
